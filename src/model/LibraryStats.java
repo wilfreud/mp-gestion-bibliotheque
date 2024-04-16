@@ -1,6 +1,6 @@
 package model;
 
-public class StatistiquesBibliotheque {
+public class LibraryStats {
     private int totalLivres;
     private int totalEmprunts;
 

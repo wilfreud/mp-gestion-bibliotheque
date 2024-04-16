@@ -1,12 +1,12 @@
-package model;
+package model.books;
 
-public class Livre {
+abstract public class Book {
     private String titre;
     private String auteur;
     private int anneePublication;
     private String ISBN;
 
-    public Livre(String titre, String auteur, int anneePublication, String ISBN){
+    public Book(String titre, String auteur, int anneePublication, String ISBN){
         this.auteur = auteur;
         this.titre = titre;
         this.anneePublication = anneePublication;
