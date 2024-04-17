@@ -2,6 +2,7 @@ package model;
 
 import exception.AlreadyBorrowedBookExeption;
 import exception.BookAlreadyExistsException;
+import exception.InvalidBookException;
 import exception.UnauthorizedBookBorrowException;
 import model.books.AudioBook;
 import model.books.Book;
@@ -12,13 +13,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Library {
-    private ArrayList<Book> booksList;
-    private HashMap<User, ArrayList<Book>> userBorrows;
+    private final ArrayList<Book> booksList;
+    private final HashMap<User, ArrayList<Book>> userBorrows;
 
-    private LibraryStats stats;
+    private final LibraryStats stats;
 
     public Library() {
-        this.stats = new LibraryStats();
+        this.booksList = new ArrayList<>();
+        this.userBorrows = new HashMap<>();
+        this.stats = new LibraryStats()
+        ;
     }
 
     public void addBook(Book book) throws BookAlreadyExistsException {
@@ -29,7 +33,10 @@ public class Library {
     /**
      * TODO: rework this (please)
      */
-    public void addBook(String titre, String auteur, int anneePublication, String ISBN, Utils.BookType category) {
+    public void addBook(String titre, String auteur, int anneePublication, String ISBN, Utils.BookType category) throws BookAlreadyExistsException, InvalidBookException {
+        if (this.doesBookExist(ISBN)) throw new BookAlreadyExistsException("Ce livre existe deja");
+        if(titre.isBlank() || auteur.isBlank() || ISBN.isBlank()) throw new InvalidBookException("Remplissez les champs obligatoires");
+
         switch (category) {
             case ESSAY:
                 this.booksList.add(new Essay(titre, auteur, anneePublication, ISBN));
@@ -49,11 +56,18 @@ public class Library {
     public ArrayList<Book> findBook(String text) {
         ArrayList<Book> resultats = new ArrayList<Book>();
         for (Book book : this.booksList)
-            if (book.getTitre().contains(text) || book.getAuteur().contains(text) || book.getISBN().contains(text))
+            if (book.getTitle().contains(text) || book.getAuthor().contains(text) || book.getISBN().contains(text))
                 resultats.add(book);
 
 
         return resultats;
+    }
+
+    public Book findUnique(String isbn) {
+        for (Book book : this.booksList) {
+            if (book.getISBN().equals(isbn)) return book;
+        }
+        return null;
     }
 
     public void borrowBook(User user, Book book) throws UnauthorizedBookBorrowException, AlreadyBorrowedBookExeption {
@@ -93,4 +107,12 @@ public class Library {
         return this.booksList.contains(book);
     }
 
+    public boolean doesBookExist(String isbn) {
+        for (Book book : this.booksList) if (book.getISBN().equals(isbn)) return true;
+        return false;
+    }
+
+    public long booksCount() {
+        return this.booksList.size();
+    }
 }

@@ -1,41 +1,41 @@
 package model.books;
 
 abstract public class Book {
-    private String titre;
-    private String auteur;
-    private int anneePublication;
+    private String title;
+    private String author;
+    private int publicationYear;
     private String ISBN;
 
-    public Book(String titre, String auteur, int anneePublication, String ISBN){
-        this.auteur = auteur;
-        this.titre = titre;
-        this.anneePublication = anneePublication;
+    public Book(String title, String author, int publicationYear, String ISBN){
+        this.author = author;
+        this.title = title;
+        this.publicationYear = publicationYear;
         this.ISBN  = ISBN;
     }
 
 
-    public String getTitre() {
-        return titre;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTitre(String titre) {
-        this.titre = titre;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getAuteur() {
-        return auteur;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setAuteur(String auteur) {
-        this.auteur = auteur;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
-    public int getAnneePublication() {
-        return anneePublication;
+    public int getPublicationYear() {
+        return publicationYear;
     }
 
-    public void setAnneePublication(int anneePublication) {
-        this.anneePublication = anneePublication;
+    public void setPublicationYear(int publicationYear) {
+        this.publicationYear = publicationYear;
     }
 
     public String getISBN() {
@@ -49,9 +49,9 @@ abstract public class Book {
     @Override
     public String toString() {
         return "Livre{" +
-                "titre='" + titre + '\'' +
-                ", auteur='" + auteur + '\'' +
-                ", anneePublication=" + anneePublication +
+                "titre='" + title + '\'' +
+                ", auteur='" + author + '\'' +
+                ", anneePublication=" + publicationYear +
                 ", ISBN='" + ISBN + '\'' +
                 '}';
     }

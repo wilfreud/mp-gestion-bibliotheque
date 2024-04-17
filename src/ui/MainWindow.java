@@ -2,14 +2,14 @@ package ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.CardLayout;
-import java.util.Stack;
 
+import model.Library;
 import ui.Utils.*;
+import ui.forms.BookForm;
 
 public class MainWindow {
+    private final Library libraryRef;
     private final String MAIN_PAGE_CONSTRAINT = "MAIN_PAGE";
     private final String USERS_PAGE_CONSTRAINT = "USERS_PAGE";
     private final String BOOKS_PAGE_CONSTRAINT = "BOOKS_PAGE";
@@ -22,9 +22,10 @@ public class MainWindow {
      *       divide constructor body into smaller parts
      *        move static things to separate file
      * */
-    public MainWindow() {
+    public MainWindow(Library library) {
+        this.libraryRef = library;
         // create frame
-        JFrame mainFrame = new JFrame("tiny-Biblio v0.0.1");
+        JFrame mainFrame = new JFrame("TinyBiblio v0.0.1");
         mainFrame.setSize(800, 600);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -34,20 +35,11 @@ public class MainWindow {
         this.mainPanel.setLayout(cardLayout);
 
         // Create components
-        JPanel homePage = new JPanel(); // first screen
-        JLabel menuText = new JLabel("MENU PRINCIPAL");
-        menuText.setFont(Utils.createFont(menuText, FontSize.H2));
-        homePage.add(menuText);
+        JPanel homePage = this.makeHomepage(); // first page
 
-        JPanel usersPage = new JPanel(); // users screen
-        JLabel usersPageText = new JLabel("Utilisateurs");
-        usersPageText.setFont(Utils.createFont(usersPageText, FontSize.H2));
-        usersPage.add(usersPageText);
+        JPanel usersPage = this.makeUsersPage();
 
-        JPanel booksPage = new JPanel(); // books page
-        JLabel booksPageText = new JLabel("Livres");
-        booksPageText.setFont(Utils.createFont(booksPageText, FontSize.H2));
-        booksPage.add(booksPageText);
+        JPanel booksPage = this.makeBooksPage();
 
         // define navigation components
         JButton homePageBtn = new JButton("Accueil");
@@ -86,4 +78,48 @@ public class MainWindow {
         mainFrame.setVisible(true);
     }
 
+    private JPanel makeHomepage() {
+        JPanel homePage = new JPanel();
+        JLabel menuText = new JLabel("MENU PRINCIPAL");
+        menuText.setFont(Utils.createFont(menuText, FontSize.H2));
+        homePage.add(menuText);
+
+        return homePage;
+    }
+
+    private JPanel makeUsersPage() {
+        JPanel usersPage = new JPanel(); // users screen
+        JLabel usersPageText = new JLabel("Utilisateurs");
+        usersPageText.setFont(Utils.createFont(usersPageText, FontSize.H2));
+        usersPage.add(usersPageText);
+
+
+        return usersPage;
+    }
+
+    private JPanel makeBooksPage() {
+        JPanel booksPage = new JPanel(); // books page
+        booksPage.setLayout(new BoxLayout(booksPage, BoxLayout.Y_AXIS));
+        JLabel booksPageText = new JLabel("Livres");
+        booksPageText.setFont(Utils.createFont(booksPageText, FontSize.H2));
+        booksPage.add(booksPageText);
+
+        // container for action buttons
+        JPanel actionPanelContainer = new JPanel(new FlowLayout());
+        int rowsCount = 0;
+        JLabel rowsCountLabel = new JLabel("Nombre de livres: " + rowsCount);
+
+        JButton addBookBtn = new JButton("Ajouter");
+        addBookBtn.addActionListener(e -> {
+            new BookForm(this.libraryRef);
+        });
+
+
+        actionPanelContainer.add(rowsCountLabel);
+        actionPanelContainer.add(addBookBtn);
+
+        booksPage.add(actionPanelContainer);
+
+        return booksPage;
+    }
 }
