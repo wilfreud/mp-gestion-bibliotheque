@@ -1,16 +1,16 @@
 package ui.books;
 
+import model.Library;
 import model.books.Book;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
 public class BooksTable extends AbstractTableModel {
-    private final ArrayList<Book> data;
+    private final ArrayList<Book> data = Library.getInstance().getBooksList();
     private final String[] columnNames = {"Titre", "Auteur", "Anne Publication", "ISBN", "Action"};
 
-    public BooksTable(ArrayList<Book> booksListRef){
-        this.data = booksListRef;
+    public BooksTable(){
     }
 
     public void notifyBookAdded() {
@@ -39,21 +39,14 @@ public class BooksTable extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Book book = data.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return book.getTitle();
-            case 1:
-                return book.getAuthor();
-            case 2:
-                return book.getPublicationYear();
-            case 3:
-                return book.getISBN();
-            case 4:
-                return "Action";
-            default:
-                return null;
-
-        }
+        return switch (columnIndex) {
+            case 0 -> book.getTitle();
+            case 1 -> book.getAuthor();
+            case 2 -> book.getPublicationYear();
+            case 3 -> book.getISBN();
+            case 4 -> "Action";
+            default -> null;
+        };
     }
 
     @Override

@@ -3,6 +3,7 @@ package ui.forms;
 import exception.BookAlreadyExistsException;
 import exception.BookNotFoundException;
 import exception.InvalidBookException;
+import exception.ExceptionUtils;
 import model.Library;
 import model.Utils;
 import model.books.Book;
@@ -11,6 +12,7 @@ import ui.dialogs.WarningDialog;
 
 import javax.swing.*;
 import java.awt.*;
+
 
 public class BookForm {
     private final JFrame frame = new JFrame("Formulaire Livre");
@@ -24,7 +26,7 @@ public class BookForm {
     private final Library library = Library.getInstance();
 
 
-    public BookForm(BooksTable booksTable) {
+    public BookForm(BooksTable BooksTable) {
         JButton submitBtn = new JButton("Enregistrer");
         initializeFrame(submitBtn, null);
 
@@ -37,21 +39,24 @@ public class BookForm {
                         Integer.parseInt(this.publicationYearTextField.getText()),
                         this.isbnTextField.getText(),
                         (Utils.BookType) this.categorySelect.getSelectedItem());
-                booksTable.notifyBookAdded();
+                BooksTable.notifyBookAdded();
                 frame.dispose();
 
-                
+
             } catch (BookAlreadyExistsException | InvalidBookException err) {
-                new WarningDialog(frame, "Erreur d'enregisterment", err.getMessage());
+                new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, err.getMessage());
             } catch (NumberFormatException nfe) {
-                new WarningDialog(frame, "Erreur d'enregistrement", "L'année doit être un nombre");
+                new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, "L'année doit être un nombre");
+            } catch (Exception eee) {
+                System.err.println(eee.getMessage());
+                new WarningDialog(frame, ExceptionUtils.UNEXPECTED_ERROR_TITLE, ExceptionUtils.UNEXPECTED_ERROR_MESSAGE);
             }
         });
 
 
     }
 
-    public BookForm(BooksTable booksTable, Book book) {
+    public BookForm(BooksTable BooksTable, Book book) {
         JButton submitBtn = new JButton("Enregistrer");
         JButton deleteBtn = new JButton("Supprimer");
         initializeFrame(submitBtn, deleteBtn);
@@ -62,7 +67,7 @@ public class BookForm {
 
         submitBtn.addActionListener(e -> {
             try {
-                if (this.library.doesBookExist(this.isbnTextField.getText()))
+                if (!this.isbnTextField.getText().equals(book.getISBN()) && this.library.doesBookExist(this.isbnTextField.getText()))
                     throw new BookAlreadyExistsException("Ce livre existe deja");
                 if (this.library.bookHasInvalidFields(book)) throw new InvalidBookException("Un champ est invalide");
                 book.setTitle(this.titleTextField.getText());
@@ -70,11 +75,14 @@ public class BookForm {
                 book.setPublicationYear(Integer.parseInt(this.publicationYearTextField.getText()));
                 book.setISBN(this.isbnTextField.getText());
                 this.frame.dispose();
-                booksTable.notifyBookAdded();
+                BooksTable.notifyBookAdded();
             } catch (BookAlreadyExistsException | InvalidBookException err) {
-                new WarningDialog(frame, "Erreur d'enregisterment", err.getMessage());
+                new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, err.getMessage());
             } catch (NumberFormatException nfe) {
-                new WarningDialog(frame, "Erreur d'enregistrement", "L'année doit être un nombre");
+                new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, "L'année doit être un nombre");
+            } catch (Exception re) {
+                System.err.println(re.getMessage());
+                new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, ExceptionUtils.UNEXPECTED_ERROR_MESSAGE);
             }
         });
 
@@ -84,10 +92,13 @@ public class BookForm {
                 if (choice == JOptionPane.YES_NO_OPTION) {
                     this.library.removeBook(book);
                     this.frame.dispose();
-                    booksTable.notifyBookAdded();
+                    BooksTable.notifyBookAdded();
                 }
             } catch (BookNotFoundException er) {
                 new WarningDialog(frame, "Erreur de suppression", er.getMessage());
+            } catch (Exception err) {
+                System.err.println(err.getMessage());
+                new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, ExceptionUtils.UNEXPECTED_ERROR_MESSAGE);
             }
         });
     }

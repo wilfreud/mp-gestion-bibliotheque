@@ -13,6 +13,8 @@ public class Library {
     // Using singleton pattern to ease the usage across the app
     private static Library instance;
     private final ArrayList<Book> booksList;
+
+    private final ArrayList<User> usersList;
     private final HashMap<User, ArrayList<Book>> userBorrows;
 
     private final LibraryStats stats;
@@ -22,6 +24,7 @@ public class Library {
         this.userBorrows = new HashMap<>();
         this.stats = new LibraryStats();
         this.booksList.add(new Essay("eh", "oh", 123, "asdas"));
+        this.usersList = new ArrayList<>();
     }
 
     public static Library getInstance() {
@@ -62,8 +65,7 @@ public class Library {
     }
 
     public void removeBook(Book book) throws BookNotFoundException {
-        if (!this.booksList.contains(book)) throw new BookNotFoundException("Ce livre n'existe pas");
-        this.booksList.remove(book);
+        if (!this.booksList.remove(book)) throw new BookNotFoundException("Ce livre n'existe pas");
     }
 
     public ArrayList<Book> findBook(String text) {
@@ -99,10 +101,8 @@ public class Library {
         }
     }
 
-    public void returnBook(User user, Book book) {
-        if (this.userBorrows.containsKey(user)) {
-            this.userBorrows.get(user).remove(book);
-        }
+    public void returnBook(User user, Book book) throws BookNotFoundException {
+        if (!this.userBorrows.get(user).remove(book)) throw new BookNotFoundException("Ce livre est introuvable");
     }
 
     public boolean isBookBorrowableByUser(User user) {
@@ -111,10 +111,6 @@ public class Library {
         else return true;
     }
 
-    public void showStats() {
-        System.out.println("Nombre total livres: " + this.stats.getTotalLivres());
-        System.out.println("Nombre total emprunts: " + this.stats.getTotalEmprunts());
-    }
 
     public boolean doesBookExist(String isbn) {
         for (Book book : this.booksList) if (book.getISBN().equals(isbn)) return true;
@@ -127,5 +123,34 @@ public class Library {
 
     public boolean bookHasInvalidFields(Book book) {
         return (book.getTitle().isBlank() || book.getAuthor().isBlank() || book.getISBN().isBlank());
+    }
+
+    public ArrayList<User> getUsersList() {
+        return usersList;
+    }
+
+    public void addUser(String name, int id) throws UserAlreadyExistException, InvalidUserException {
+        if (name == null || name.isBlank()) throw new InvalidUserException("Informations invalides");
+        if (this.doesUserExist(id)) throw new UserAlreadyExistException("Cet utilisateur existe deja");
+
+        this.usersList.add(new User(name, id));
+    }
+
+    public boolean doesUserExist(int id) {
+        for (User user : usersList) if (user.getId() == id) return true;
+        return false;
+    }
+
+    public void removeUser(User user) throws UserNotFoundException {
+        if (!this.usersList.remove(user)) throw new UserNotFoundException("Cet utilisateur n'existe pas");
+        this.userBorrows.remove(user);
+    }
+
+    public HashMap<User, ArrayList<Book>> getUserBorrows() {
+        return userBorrows;
+    }
+
+    public LibraryStats getStats() {
+        return stats;
     }
 }

@@ -6,6 +6,10 @@ import ui.books.BooksTable;
 import ui.books.ButtonEditor;
 import ui.books.ButtonRenderer;
 import ui.forms.BookForm;
+import ui.forms.UserForm;
+import ui.users.UsersButtonEditor;
+import ui.users.UsersButtonRenderer;
+import ui.users.UsersTable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,7 +100,23 @@ public class MainWindow {
         usersPageText.setFont(Utils.createFont(usersPageText, FontSize.H2));
         usersPage.add(usersPageText);
 
+        // table
+        UsersTable tableModel = new UsersTable();
+        JTable table = new JTable(tableModel);
+        table.getColumnModel().getColumn(3).setCellRenderer(new UsersButtonRenderer());
+        table.getColumnModel().getColumn(3).setCellEditor(new UsersButtonEditor(tableModel, table));
 
+        // actions
+        JPanel actionPanelContainer = new JPanel(new FlowLayout());
+        JButton addUserBtn = new JButton("Ajouter");
+        addUserBtn.addActionListener(e -> {
+            new UserForm(tableModel);
+        });
+
+        actionPanelContainer.add(addUserBtn);
+
+        usersPage.add(actionPanelContainer);
+        usersPage.add(new JScrollPane(table), BorderLayout.CENTER);
         return usersPage;
     }
 
@@ -108,7 +128,7 @@ public class MainWindow {
         booksPage.add(booksPageText);
 
         // display books
-        BooksTable tableModel = new BooksTable(libraryRef.getBooksList());
+        BooksTable tableModel = new BooksTable();
         JTable table = new JTable(tableModel);
         table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
         table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(tableModel, table));
