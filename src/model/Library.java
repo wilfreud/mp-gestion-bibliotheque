@@ -15,6 +15,11 @@ public class Library {
     private final ArrayList<Book> booksList;
 
     private final ArrayList<User> usersList;
+
+    public HashMap<User, ArrayList<Book>> getUserBorrows() {
+        return userBorrows;
+    }
+
     private final HashMap<User, ArrayList<Book>> userBorrows;
 
 
@@ -109,10 +114,6 @@ public class Library {
     public boolean doesBookExist(String isbn) {
         for (Book book : this.booksList) if (book.getISBN().equals(isbn)) return true;
         return false;
-    }
-
-    public long booksCount() {
-        return this.booksList.size();
     }
 
     public boolean bookHasInvalidFields(Book book) {

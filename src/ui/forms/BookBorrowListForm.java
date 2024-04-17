@@ -29,8 +29,8 @@ public class BookBorrowListForm {
         BooksTable tableModel = new BooksTable(user.getBorrowedBooks());
         JTable table = new JTable(tableModel);
 
-        table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer("Rendre"));
-        table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(tableModel, table, "Rendre", user));
+        table.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer("Rendre"));
+        table.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(tableModel, table, "Rendre", user));
 
         // action button
         JButton createBtn = new JButton("Nouvel emprunt");

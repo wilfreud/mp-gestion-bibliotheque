@@ -5,12 +5,26 @@ import model.books.Book;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BooksTable extends AbstractTableModel {
-    private ArrayList<Book> data = Library.getInstance().getBooksList();
-    private final String[] columnNames = {"Titre", "Auteur", "Anne Publication", "ISBN", "Action"};
+    private static final Map<String, String> classNameMap = new HashMap<>();
 
-    public BooksTable(){
+    static {
+        classNameMap.put("essay", "Essai");
+        classNameMap.put("novel", "Roman");
+        classNameMap.put("audiobook", "Livre Audio");
+    }
+
+    private String getDisplayString(String className) {
+        return classNameMap.getOrDefault(className.toLowerCase(), "Unknown");
+    }
+
+    private ArrayList<Book> data = Library.getInstance().getBooksList();
+    private final String[] columnNames = {"Titre", "Auteur", "Anne Publication", "ISBN", "Genre", "Action"};
+
+    public BooksTable() {
     }
 
     public BooksTable(ArrayList<Book> bookList) {
@@ -22,12 +36,12 @@ public class BooksTable extends AbstractTableModel {
     }
 
     @Override
-    public int getRowCount(){
+    public int getRowCount() {
         return this.data.size();
     }
 
     @Override
-    public int getColumnCount(){
+    public int getColumnCount() {
         return columnNames.length;
     }
 
@@ -48,13 +62,18 @@ public class BooksTable extends AbstractTableModel {
             case 1 -> book.getAuthor();
             case 2 -> book.getPublicationYear();
             case 3 -> book.getISBN();
-            case 4 -> "Modifier";
+            case 4 -> {
+                // Get the class name and convert it to display string
+                String className = book.getClass().getSimpleName().toLowerCase();
+                yield getDisplayString(className);
+            }
+            case 5 -> "Modifier";
             default -> null;
         };
     }
 
     @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex){
-        return columnIndex == 4;
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex == 5;
     }
 }

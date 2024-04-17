@@ -1,6 +1,8 @@
 package ui;
 
 import model.Library;
+import model.User;
+import model.books.Book;
 import ui.Utils.FontSize;
 import ui.books.BooksTable;
 import ui.books.ButtonEditor;
@@ -13,6 +15,9 @@ import ui.users.UsersTable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainWindow {
     private final Library libraryRef;
@@ -49,7 +54,12 @@ public class MainWindow {
         homePageBtn.setMaximumSize(new Dimension(20, 30));
 
         // bind action listeners
-        homePageBtn.addActionListener(e -> cardLayout.show(this.mainPanel, MAIN_PAGE_CONSTRAINT));
+        homePageBtn.addActionListener(e -> { // always re-render the component
+            JPanel refreshedHomePage = makeHomepage();
+            mainPanel.remove(homePage);
+            mainPanel.add(refreshedHomePage, MAIN_PAGE_CONSTRAINT);
+            cardLayout.show(mainPanel, MAIN_PAGE_CONSTRAINT);
+        });
         usersPageBtn.addActionListener(e -> cardLayout.show(this.mainPanel, USERS_PAGE_CONSTRAINT));
         booksPageBtn.addActionListener(e -> cardLayout.show(this.mainPanel, BOOKS_PAGE_CONSTRAINT));
 
@@ -74,20 +84,79 @@ public class MainWindow {
 
     private JPanel makeHomepage() {
         JPanel homePage = new JPanel();
-        JLabel menuText = new JLabel("MENU PRINCIPAL");
+        homePage.setLayout(new BoxLayout(homePage, BoxLayout.Y_AXIS));
+
+        JLabel menuText = new JLabel("Accueil");
         menuText.setFont(Utils.createFont(menuText, FontSize.H2));
+        menuText.setAlignmentX(Component.CENTER_ALIGNMENT);
         homePage.add(menuText);
+
+        // Retrieve user borrows from the library
+        HashMap<User, ArrayList<Book>> borrowsList = this.libraryRef.getUserBorrows();
+
+        // Calculate statistics
+        int numUsersBorrowed = borrowsList.size();
+
+        int numBorrowedBooks = 0;
+        for (ArrayList<Book> books : borrowsList.values()) {
+            numBorrowedBooks += books.size();
+        }
+
+        // Display the statistics
+        JLabel usersLabel = new JLabel("Nombre d'utilisateurs ayant emprunté : " + numUsersBorrowed);
+        usersLabel.setFont(Utils.createFont(usersLabel, FontSize.H4));
+
+        JLabel booksLabel = new JLabel("Nombre total de livres empruntés : " + numBorrowedBooks);
+        booksLabel.setFont(Utils.createFont(booksLabel, FontSize.H4));
+
+        // Calculate average books per user
+        double averageBooksPerUser = numUsersBorrowed > 0 ? (double) numBorrowedBooks / numUsersBorrowed : 0.0;
+        JLabel averageBooksLabel = new JLabel("Moyenne de livres empruntés par utilisateur : " + String.format("%.2f", averageBooksPerUser));
+        averageBooksLabel.setFont(Utils.createFont(averageBooksLabel, FontSize.H4));
+
+        // Find user with the most borrows
+        User userWithMostBorrows = null;
+        int maxBorrows = 0;
+        for (Map.Entry<User, ArrayList<Book>> entry : borrowsList.entrySet()) {
+            int numUserBorrows = entry.getValue().size();
+            if (numUserBorrows > maxBorrows) {
+                maxBorrows = numUserBorrows;
+                userWithMostBorrows = entry.getKey();
+            }
+        }
+        JLabel mostBorrowsLabel = new JLabel("Utilisateur avec le plus d'emprunts : " + (userWithMostBorrows != null ? userWithMostBorrows.getName() : "N/A"));
+        mostBorrowsLabel.setFont(Utils.createFont(mostBorrowsLabel, FontSize.H4));
+
+        // Create a panel to hold the statistics labels
+        JPanel statisticsPanel = new JPanel();
+        statisticsPanel.setLayout(new BoxLayout(statisticsPanel, BoxLayout.Y_AXIS));
+        statisticsPanel.add(usersLabel);
+        statisticsPanel.add(Box.createVerticalStrut(10));
+        statisticsPanel.add(booksLabel);
+        statisticsPanel.add(Box.createVerticalStrut(10));
+        statisticsPanel.add(averageBooksLabel);
+        statisticsPanel.add(Box.createVerticalStrut(10));
+        statisticsPanel.add(mostBorrowsLabel);
+
+        // Add the statistics panel to the homepage
+        homePage.add(Box.createVerticalStrut(20));
+        homePage.add(statisticsPanel);
+        homePage.add(Box.createVerticalGlue());
 
         return homePage;
     }
 
+
     private JPanel makeUsersPage() {
-        JPanel usersPage = new JPanel(); // users screen
+        JPanel usersPage = new JPanel(); // Users screen
+        usersPage.setLayout(new BorderLayout());
+
+        // Header label
         JLabel usersPageText = new JLabel("Utilisateurs");
         usersPageText.setFont(Utils.createFont(usersPageText, FontSize.H2));
-        usersPage.add(usersPageText);
+        usersPage.add(usersPageText, BorderLayout.NORTH);
 
-        // table
+        // Table
         UsersTable tableModel = new UsersTable();
         JTable table = new JTable(tableModel);
         table.getColumnModel().getColumn(3).setCellRenderer(new UsersButtonRenderer());
@@ -96,15 +165,18 @@ public class MainWindow {
         table.getColumnModel().getColumn(4).setCellRenderer(new UsersButtonRenderer("Emprunts"));
         table.getColumnModel().getColumn(4).setCellEditor(new UsersButtonEditor(tableModel, table, "Emprunts", true));
 
-        // actions
-        JPanel actionPanelContainer = new JPanel(new FlowLayout());
+        JScrollPane tableScrollPane = new JScrollPane(table);
+        tableScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        usersPage.add(tableScrollPane, BorderLayout.CENTER);
+
+        // Action panel (Add User button)
+        JPanel actionPanel = new JPanel();
         JButton addUserBtn = new JButton("Ajouter");
         addUserBtn.addActionListener(e -> new UserForm(tableModel));
+        actionPanel.add(addUserBtn);
 
-        actionPanelContainer.add(addUserBtn);
+        usersPage.add(actionPanel, BorderLayout.SOUTH);
 
-        usersPage.add(actionPanelContainer);
-        usersPage.add(new JScrollPane(table), BorderLayout.CENTER);
         return usersPage;
     }
 
@@ -118,19 +190,19 @@ public class MainWindow {
         // display books
         BooksTable tableModel = new BooksTable();
         JTable table = new JTable(tableModel);
-        table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(tableModel, table));
+        table.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(tableModel, table));
 
 
         // container for action buttons
         JPanel actionPanelContainer = new JPanel(new FlowLayout());
-        JLabel rowsCountLabel = new JLabel("Nombre de livres: " + libraryRef.booksCount());
+//        JLabel rowsCountLabel = new JLabel("Nombre de livres: " + libraryRef.booksCount());
 
         JButton addBookBtn = new JButton("Ajouter");
         addBookBtn.addActionListener(e -> new BookForm(tableModel));
 
 
-        actionPanelContainer.add(rowsCountLabel);
+//        actionPanelContainer.add(rowsCountLabel);
         actionPanelContainer.add(addBookBtn);
 
         booksPage.add(actionPanelContainer);
