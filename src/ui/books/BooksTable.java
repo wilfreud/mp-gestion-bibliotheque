@@ -4,7 +4,6 @@ import model.books.Book;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
-import java.util.List;
 
 public class BooksTable extends AbstractTableModel {
     private final ArrayList<Book> data;

@@ -25,8 +25,8 @@ public class MainWindow {
      *        move static things to separate file
      *      use `JOptionPane.showConfirmDialog` for confirm dialogs
      * */
-    public MainWindow(Library library) {
-        this.libraryRef = library;
+    public MainWindow() {
+        this.libraryRef = Library.getInstance();
         // create frame
         JFrame mainFrame = new JFrame("TinyBiblio v0.0.1");
         mainFrame.setSize(800, 600);
@@ -111,7 +111,7 @@ public class MainWindow {
         BooksTable tableModel = new BooksTable(libraryRef.getBooksList());
         JTable table = new JTable(tableModel);
         table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(libraryRef, tableModel, table));
+        table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(tableModel, table));
 
 
         // container for action buttons
@@ -120,7 +120,7 @@ public class MainWindow {
 
         JButton addBookBtn = new JButton("Ajouter");
         addBookBtn.addActionListener(e -> {
-            new BookForm(this.libraryRef, tableModel);
+            new BookForm(tableModel);
         });
 
 

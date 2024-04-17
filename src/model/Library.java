@@ -5,22 +5,30 @@ import model.books.AudioBook;
 import model.books.Book;
 import model.books.Essay;
 import model.books.Novel;
-import ui.books.BooksTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Library {
+    // Using singleton pattern to ease the usage across the app
+    private static Library instance;
     private final ArrayList<Book> booksList;
     private final HashMap<User, ArrayList<Book>> userBorrows;
 
     private final LibraryStats stats;
 
-    public Library() {
+    private Library() {
         this.booksList = new ArrayList<>();
         this.userBorrows = new HashMap<>();
         this.stats = new LibraryStats();
         this.booksList.add(new Essay("eh", "oh", 123, "asdas"));
+    }
+
+    public static Library getInstance() {
+        if (instance == null) {
+            instance = new Library();
+        }
+        return instance;
     }
 
     public ArrayList<Book> getBooksList() {
@@ -54,7 +62,7 @@ public class Library {
     }
 
     public void removeBook(Book book) throws BookNotFoundException {
-        if(!this.booksList.contains(book)) throw new BookNotFoundException("Ce livre n'existe pas");
+        if (!this.booksList.contains(book)) throw new BookNotFoundException("Ce livre n'existe pas");
         this.booksList.remove(book);
     }
 

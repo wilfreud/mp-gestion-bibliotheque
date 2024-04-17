@@ -21,9 +21,10 @@ public class BookForm {
     private JTextField authorTextField;
     private JTextField publicationYearTextField;
     private JTextField isbnTextField;
+    private final Library library = Library.getInstance();
 
 
-    public BookForm(Library library, BooksTable booksTable) {
+    public BookForm(BooksTable booksTable) {
         JButton submitBtn = new JButton("Enregistrer");
         initializeFrame(submitBtn, null);
 
@@ -31,14 +32,15 @@ public class BookForm {
         submitBtn.addActionListener(e -> {
             try {
 
-                library.addBook(this.titleTextField.getText(),
+                this.library.addBook(this.titleTextField.getText(),
                         this.authorTextField.getText(),
                         Integer.parseInt(this.publicationYearTextField.getText()),
                         this.isbnTextField.getText(),
                         (Utils.BookType) this.categorySelect.getSelectedItem());
                 booksTable.notifyBookAdded();
                 frame.dispose();
-                System.out.println(library.booksCount());
+
+                
             } catch (BookAlreadyExistsException | InvalidBookException err) {
                 new WarningDialog(frame, "Erreur d'enregisterment", err.getMessage());
             } catch (NumberFormatException nfe) {
@@ -49,7 +51,7 @@ public class BookForm {
 
     }
 
-    public BookForm(Library library, BooksTable booksTable, Book book) {
+    public BookForm(BooksTable booksTable, Book book) {
         JButton submitBtn = new JButton("Enregistrer");
         JButton deleteBtn = new JButton("Supprimer");
         initializeFrame(submitBtn, deleteBtn);
@@ -60,9 +62,9 @@ public class BookForm {
 
         submitBtn.addActionListener(e -> {
             try {
-                if (library.doesBookExist(this.isbnTextField.getText()))
+                if (this.library.doesBookExist(this.isbnTextField.getText()))
                     throw new BookAlreadyExistsException("Ce livre existe deja");
-                if (library.bookHasInvalidFields(book)) throw new InvalidBookException("Un champ est invalide");
+                if (this.library.bookHasInvalidFields(book)) throw new InvalidBookException("Un champ est invalide");
                 book.setTitle(this.titleTextField.getText());
                 book.setAuthor(this.authorTextField.getText());
                 book.setPublicationYear(Integer.parseInt(this.publicationYearTextField.getText()));
@@ -80,7 +82,7 @@ public class BookForm {
             try {
                 final int choice = JOptionPane.showConfirmDialog(frame, "Etes-vous sûr(e) de vouloir supprimer ce livre?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
                 if (choice == JOptionPane.YES_NO_OPTION) {
-                    library.removeBook(book);
+                    this.library.removeBook(book);
                     this.frame.dispose();
                     booksTable.notifyBookAdded();
                 }

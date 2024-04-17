@@ -5,48 +5,57 @@ import model.books.Book;
 import java.util.ArrayList;
 
 public class User {
-    private String nom;
-    private int numeroIdentification;
-    private ArrayList<Book> livresEmpruntes;
+    private String name;
+    private int id;
+    private boolean allowedToBorrowBook = true; // in terms of cotisation
+    private ArrayList<Book> borrowedBooks;
 
-    public User(String nom, int numeroIdentification) {
-        this.nom = nom;
-        this.numeroIdentification = numeroIdentification;
+    public User(String name, int id) {
+        this.name = name;
+        this.id = id;
     }
 
-    public void emprunterLivre(Book book) {
-        this.livresEmpruntes.add(book);
+    public void addBorredBook(Book book) {
+        this.borrowedBooks.add(book);
     }
 
-    public void retournerLiver(Book book) {
-        this.livresEmpruntes.remove(book);
+    public void returnBorrowedBook(Book book) {
+        this.borrowedBooks.remove(book);
     }
 
-    public void voirLivreEmpruntes(){
-        this.livresEmpruntes.forEach(book -> System.out.println(book.toString()));
+    public void printBorrowedBooks(){
+        this.borrowedBooks.forEach(book -> System.out.println(book.toString()));
     }
 
-    public String getNom() {
-        return nom;
+    public String getName() {
+        return name;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getNumeroIdentification() {
-        return numeroIdentification;
+    public int getId() {
+        return id;
     }
 
-    public void setNumeroIdentification(int numeroIdentification) {
-        this.numeroIdentification = numeroIdentification;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public ArrayList<Book> getLivresEmpruntes() {
-        return livresEmpruntes;
+    public ArrayList<Book> getBorrowedBooks() {
+        return borrowedBooks;
     }
 
-    public void setLivresEmpruntes(ArrayList<Book> livresEmpruntes) {
-        this.livresEmpruntes = livresEmpruntes;
+    public void setBorrowedBooks(ArrayList<Book> borrowedBooks) {
+        this.borrowedBooks = borrowedBooks;
     }
+
+    public boolean isAllowedToBorrowBook() {
+        return allowedToBorrowBook;
+    }
+    public void setAllowedToBorrowBook(boolean allowedToBorrowBook) {
+        this.allowedToBorrowBook = allowedToBorrowBook;
+    }
+
 }
