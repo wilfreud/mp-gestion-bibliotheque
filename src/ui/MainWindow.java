@@ -1,12 +1,14 @@
 package ui;
 
+import model.Library;
+import ui.Utils.FontSize;
+import ui.books.BooksTable;
+import ui.books.ButtonEditor;
+import ui.books.ButtonRenderer;
+import ui.forms.BookForm;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.CardLayout;
-
-import model.Library;
-import ui.Utils.*;
-import ui.forms.BookForm;
 
 public class MainWindow {
     private final Library libraryRef;
@@ -21,6 +23,7 @@ public class MainWindow {
      * TODO: use grid layout
      *       divide constructor body into smaller parts
      *        move static things to separate file
+     *      use `JOptionPane.showConfirmDialog` for confirm dialogs
      * */
     public MainWindow(Library library) {
         this.libraryRef = library;
@@ -104,14 +107,20 @@ public class MainWindow {
         booksPageText.setFont(Utils.createFont(booksPageText, FontSize.H2));
         booksPage.add(booksPageText);
 
+        // display books
+        BooksTable tableModel = new BooksTable(libraryRef.getBooksList());
+        JTable table = new JTable(tableModel);
+        table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(libraryRef, tableModel, table));
+
+
         // container for action buttons
         JPanel actionPanelContainer = new JPanel(new FlowLayout());
-        int rowsCount = 0;
-        JLabel rowsCountLabel = new JLabel("Nombre de livres: " + rowsCount);
+        JLabel rowsCountLabel = new JLabel("Nombre de livres: " + libraryRef.booksCount());
 
         JButton addBookBtn = new JButton("Ajouter");
         addBookBtn.addActionListener(e -> {
-            new BookForm(this.libraryRef);
+            new BookForm(this.libraryRef, tableModel);
         });
 
 
@@ -119,6 +128,7 @@ public class MainWindow {
         actionPanelContainer.add(addBookBtn);
 
         booksPage.add(actionPanelContainer);
+        booksPage.add(new JScrollPane(table), BorderLayout.CENTER);
 
         return booksPage;
     }

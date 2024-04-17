@@ -1,13 +1,11 @@
 package model;
 
-import exception.AlreadyBorrowedBookExeption;
-import exception.BookAlreadyExistsException;
-import exception.InvalidBookException;
-import exception.UnauthorizedBookBorrowException;
+import exception.*;
 import model.books.AudioBook;
 import model.books.Book;
 import model.books.Essay;
 import model.books.Novel;
+import ui.books.BooksTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,12 +19,17 @@ public class Library {
     public Library() {
         this.booksList = new ArrayList<>();
         this.userBorrows = new HashMap<>();
-        this.stats = new LibraryStats()
-        ;
+        this.stats = new LibraryStats();
+        this.booksList.add(new Essay("eh", "oh", 123, "asdas"));
     }
 
-    public void addBook(Book book) throws BookAlreadyExistsException {
-        if (this.doesBookExist(book)) throw new BookAlreadyExistsException("Ce livre existe deja");
+    public ArrayList<Book> getBooksList() {
+        return this.booksList;
+    }
+
+    public void addBook(Book book) throws BookAlreadyExistsException, InvalidBookException {
+        if (this.doesBookExist(book.getISBN())) throw new BookAlreadyExistsException("Ce livre existe deja");
+        if (this.bookHasInvalidFields(book)) throw new InvalidBookException("Un champ est in correct");
         this.booksList.add(book);
     }
 
@@ -35,7 +38,8 @@ public class Library {
      */
     public void addBook(String titre, String auteur, int anneePublication, String ISBN, Utils.BookType category) throws BookAlreadyExistsException, InvalidBookException {
         if (this.doesBookExist(ISBN)) throw new BookAlreadyExistsException("Ce livre existe deja");
-        if(titre.isBlank() || auteur.isBlank() || ISBN.isBlank()) throw new InvalidBookException("Remplissez les champs obligatoires");
+        if (titre.isBlank() || auteur.isBlank() || ISBN.isBlank())
+            throw new InvalidBookException("Remplissez les champs obligatoires");
 
         switch (category) {
             case ESSAY:
@@ -49,7 +53,8 @@ public class Library {
         }
     }
 
-    public void removeBook(Book book) {
+    public void removeBook(Book book) throws BookNotFoundException {
+        if(!this.booksList.contains(book)) throw new BookNotFoundException("Ce livre n'existe pas");
         this.booksList.remove(book);
     }
 
@@ -103,10 +108,6 @@ public class Library {
         System.out.println("Nombre total emprunts: " + this.stats.getTotalEmprunts());
     }
 
-    public boolean doesBookExist(Book book) {
-        return this.booksList.contains(book);
-    }
-
     public boolean doesBookExist(String isbn) {
         for (Book book : this.booksList) if (book.getISBN().equals(isbn)) return true;
         return false;
@@ -114,5 +115,9 @@ public class Library {
 
     public long booksCount() {
         return this.booksList.size();
+    }
+
+    public boolean bookHasInvalidFields(Book book) {
+        return (book.getTitle().isBlank() || book.getAuthor().isBlank() || book.getISBN().isBlank());
     }
 }
