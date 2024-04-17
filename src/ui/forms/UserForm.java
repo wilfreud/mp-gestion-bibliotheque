@@ -26,7 +26,7 @@ public class UserForm {
         submitBtn.addActionListener(e -> {
             try {
                 int id = Integer.parseInt(idTextField.getText());
-                if (id < 1) throw new InvalidUserException("L'identifiant ne peut etre negatif");
+                if (id < 0) throw new InvalidUserException("L'identifiant ne peut etre negatif");
                 this.library.addUser(
                         nameTextField.getText(),
                         id,

@@ -7,10 +7,14 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
 public class BooksTable extends AbstractTableModel {
-    private final ArrayList<Book> data = Library.getInstance().getBooksList();
+    private ArrayList<Book> data = Library.getInstance().getBooksList();
     private final String[] columnNames = {"Titre", "Auteur", "Anne Publication", "ISBN", "Action"};
 
     public BooksTable(){
+    }
+
+    public BooksTable(ArrayList<Book> bookList) {
+        this.data = bookList;
     }
 
     public void notifyBookAdded() {
@@ -44,7 +48,7 @@ public class BooksTable extends AbstractTableModel {
             case 1 -> book.getAuthor();
             case 2 -> book.getPublicationYear();
             case 3 -> book.getISBN();
-            case 4 -> "Action";
+            case 4 -> "Modifier";
             default -> null;
         };
     }

@@ -1,27 +1,40 @@
 package ui.users;
 
 import model.User;
+import ui.forms.BookBorrowListForm;
 import ui.forms.UserForm;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class UsersButtonEditor extends DefaultCellEditor {
     private final JButton button;
     private final UsersTable model;
 
-    public UsersButtonEditor(UsersTable usersTable, JTable table) {
+    public UsersButtonEditor(UsersTable usersTable, JTable table, String btnMessage) {
         super(new JCheckBox());
         this.model = usersTable;
-        this.button = new JButton("Modifier");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final int rowIndex = table.convertRowIndexToModel(table.getEditingRow());
-                User user = model.getUserAt(rowIndex);
-                new UserForm(model, user);
+        this.button = new JButton(btnMessage);
+        this.button.addActionListener(e -> {
+            final int rowIndex = table.convertRowIndexToModel(table.getEditingRow());
+            User user = model.getUserAt(rowIndex);
+            new UserForm(model, user);
+        });
+    }
+
+    public UsersButtonEditor(UsersTable usersTable, JTable table, String btnMessage, boolean isBorrowRelated) {
+        super(new JCheckBox());
+        this.model = usersTable;
+        this.button = new JButton(btnMessage);
+        this.button.addActionListener(e -> {
+            final int rowIndex = table.convertRowIndexToModel(table.getEditingRow());
+            User user = model.getUserAt(rowIndex);
+
+            if (isBorrowRelated) {
+                new BookBorrowListForm(user);
+            } else {
+                System.out.println("Not handled");
             }
+
         });
     }
 

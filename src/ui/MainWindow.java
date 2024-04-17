@@ -19,16 +19,9 @@ public class MainWindow {
     private final String MAIN_PAGE_CONSTRAINT = "MAIN_PAGE";
     private final String USERS_PAGE_CONSTRAINT = "USERS_PAGE";
     private final String BOOKS_PAGE_CONSTRAINT = "BOOKS_PAGE";
-    private final String BORROWS_PAGE_CONSTRAINT = "BORROWS_PAGE";
 
     private final JPanel mainPanel;
 
-    /*
-     * TODO: use grid layout
-     *       divide constructor body into smaller parts
-     *        move static things to separate file
-     *      use `JOptionPane.showConfirmDialog` for confirm dialogs
-     * */
     public MainWindow() {
         this.libraryRef = Library.getInstance();
         // create frame
@@ -56,15 +49,9 @@ public class MainWindow {
         homePageBtn.setMaximumSize(new Dimension(20, 30));
 
         // bind action listeners
-        homePageBtn.addActionListener(e -> {
-            cardLayout.show(this.mainPanel, MAIN_PAGE_CONSTRAINT);
-        });
-        usersPageBtn.addActionListener(e -> {
-            cardLayout.show(this.mainPanel, USERS_PAGE_CONSTRAINT);
-        });
-        booksPageBtn.addActionListener(e -> {
-            cardLayout.show(this.mainPanel, BOOKS_PAGE_CONSTRAINT);
-        });
+        homePageBtn.addActionListener(e -> cardLayout.show(this.mainPanel, MAIN_PAGE_CONSTRAINT));
+        usersPageBtn.addActionListener(e -> cardLayout.show(this.mainPanel, USERS_PAGE_CONSTRAINT));
+        booksPageBtn.addActionListener(e -> cardLayout.show(this.mainPanel, BOOKS_PAGE_CONSTRAINT));
 
         // mount components
         this.mainPanel.add(homePage, MAIN_PAGE_CONSTRAINT);
@@ -104,14 +91,15 @@ public class MainWindow {
         UsersTable tableModel = new UsersTable();
         JTable table = new JTable(tableModel);
         table.getColumnModel().getColumn(3).setCellRenderer(new UsersButtonRenderer());
-        table.getColumnModel().getColumn(3).setCellEditor(new UsersButtonEditor(tableModel, table));
+        table.getColumnModel().getColumn(3).setCellEditor(new UsersButtonEditor(tableModel, table, "Modifier"));
+
+        table.getColumnModel().getColumn(4).setCellRenderer(new UsersButtonRenderer("Emprunts"));
+        table.getColumnModel().getColumn(4).setCellEditor(new UsersButtonEditor(tableModel, table, "Emprunts", true));
 
         // actions
         JPanel actionPanelContainer = new JPanel(new FlowLayout());
         JButton addUserBtn = new JButton("Ajouter");
-        addUserBtn.addActionListener(e -> {
-            new UserForm(tableModel);
-        });
+        addUserBtn.addActionListener(e -> new UserForm(tableModel));
 
         actionPanelContainer.add(addUserBtn);
 
@@ -139,9 +127,7 @@ public class MainWindow {
         JLabel rowsCountLabel = new JLabel("Nombre de livres: " + libraryRef.booksCount());
 
         JButton addBookBtn = new JButton("Ajouter");
-        addBookBtn.addActionListener(e -> {
-            new BookForm(tableModel);
-        });
+        addBookBtn.addActionListener(e -> new BookForm(tableModel));
 
 
         actionPanelContainer.add(rowsCountLabel);

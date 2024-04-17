@@ -17,14 +17,14 @@ public class Library {
     private final ArrayList<User> usersList;
     private final HashMap<User, ArrayList<Book>> userBorrows;
 
-    private final LibraryStats stats;
 
     private Library() {
         this.booksList = new ArrayList<>();
         this.userBorrows = new HashMap<>();
-        this.stats = new LibraryStats();
         this.booksList.add(new Essay("eh", "oh", 123, "asdas"));
         this.usersList = new ArrayList<>();
+        this.usersList.add(new User("Yankee suprem", 1));
+        this.usersList.add(new User("Jay", 2));
     }
 
     public static Library getInstance() {
@@ -38,9 +38,6 @@ public class Library {
         return this.booksList;
     }
 
-    /**
-     * TODO: rework this (please)
-     */
     public void addBook(String titre, String auteur, int anneePublication, String ISBN, Utils.BookType category) throws BookAlreadyExistsException, InvalidBookException {
         if (this.doesBookExist(ISBN)) throw new BookAlreadyExistsException("Ce livre existe deja");
         if (titre.isBlank() || auteur.isBlank() || ISBN.isBlank())
@@ -62,35 +59,45 @@ public class Library {
         if (!this.booksList.remove(book)) throw new BookNotFoundException("Ce livre n'existe pas");
     }
 
-    public ArrayList<Book> findBook(String text) {
-        ArrayList<Book> resultats = new ArrayList<Book>();
-        for (Book book : this.booksList)
-            if (book.getTitle().contains(text) || book.getAuthor().contains(text) || book.getISBN().contains(text))
-                resultats.add(book);
-
-
-        return resultats;
-    }
-
-    public void registerBookBorrow(User user, Book book) throws UnauthorizedBookBorrowException, AlreadyBorrowedBookExeption {
+    public void registerBookBorrow(User user, Book book) throws UnauthorizedBookBorrowException, InvalidBookException, AlreadyBorrowedBookExeption {
+        if (book == null) {
+            throw new InvalidBookException("Aucun livre choisi");
+        }
+        if (user == null) {
+            throw new UnauthorizedBookBorrowException("Aucun utilisateur cible choisi");
+        }
         if (!this.isBookBorrowableByUser(user)) {
-            throw new UnauthorizedBookBorrowException("Cet utilisateur n'est pas éligible");
+            throw new UnauthorizedBookBorrowException("Cet utilisateur n'est pas éligible pour emprunter plus de livres");
         }
 
-        if (this.userBorrows.containsKey(user)) {
-            ArrayList<Book> books = this.userBorrows.get(user);
-            if (this.booksList.contains(book)) throw new AlreadyBorrowedBookExeption("Ce livre a deja été emprunté");
-            books.add(book);
-        } else {
-            ArrayList<Book> initListe = new ArrayList<Book>();
-            initListe.add(book);
-            this.userBorrows.put(user, initListe);
+        ArrayList<Book> borrowedBooks = this.userBorrows.getOrDefault(user, new ArrayList<>());
+
+        if (borrowedBooks.contains(book)) {
+            throw new AlreadyBorrowedBookExeption("Ce livre a déjà été emprunté par cet utilisateur");
         }
+
+        borrowedBooks.add(book);
+
+        this.userBorrows.put(user, borrowedBooks);
     }
+
 
     public void registerBookReturn(User user, Book book) throws BookNotFoundException {
-        if (!this.userBorrows.get(user).remove(book)) throw new BookNotFoundException("Ce livre est introuvable");
+        ArrayList<Book> books = this.userBorrows.get(user);
+        if (books == null) {
+            throw new BookNotFoundException("No borrowed books found for this user");
+        }
+
+        boolean removed = books.remove(book);
+        if (!removed) {
+            throw new BookNotFoundException("The specified book is not borrowed by this user");
+        }
+
+        for(Book b : books) {
+            System.out.println(b);
+        }
     }
+
 
     public boolean isBookBorrowableByUser(User user) {
         if (this.userBorrows.containsKey(user))
@@ -128,7 +135,7 @@ public class Library {
         A better solution would have been to use a reference to user.borrowedBooks
         ...
         */
-        this.userBorrows.put(user, new ArrayList<Book>());
+        this.userBorrows.put(user, new ArrayList<>());
     }
 
     public boolean doesUserExist(int id) {
@@ -141,11 +148,4 @@ public class Library {
         this.userBorrows.remove(user);
     }
 
-    public HashMap<User, ArrayList<Book>> getUserBorrows() {
-        return userBorrows;
-    }
-
-    public LibraryStats getStats() {
-        return stats;
-    }
 }

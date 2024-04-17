@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class UsersTable extends AbstractTableModel {
     private final ArrayList<User> usersList = Library.getInstance().getUsersList();
-    private final String[] columnNames = {"Nom", "Identifiant", "A jour paiement", "Action"};
+    private final String[] columnNames = {"Nom", "Identifiant", "A jour paiement", "Action", "Emprunt"};
     public UsersTable(){}
 
     public void notifyUserAdded(){
@@ -41,13 +41,14 @@ public class UsersTable extends AbstractTableModel {
             case 0 -> user.getName();
             case 1 -> user.getId();
             case 2 -> user.isAllowedToBorrowBook() ? "OUI" : "NON";
-            case 3 -> "Action";
+            case 3 -> "Modifier";
+            case 4 -> "Emprunts";
             default -> null;
         };
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex ){
-        return  columnIndex == 3;
+        return  columnIndex == 3 || columnIndex == 4;
     }
 }
