@@ -13,6 +13,7 @@ public class User {
     public User(String name, int id) {
         this.name = name;
         this.id = id;
+        this.borrowedBooks = new ArrayList<Book>();
     }
 
     public void addBorredBook(Book book) {

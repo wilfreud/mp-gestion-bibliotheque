@@ -7,6 +7,7 @@ import ui.dialogs.WarningDialog;
 import ui.users.UsersTable;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 import exception.ExceptionUtils;
@@ -15,7 +16,7 @@ public class UserForm {
     private final JFrame frame = new JFrame("Formulaire utilisateur");
     private JTextField nameTextField;
     private JTextField idTextField;
-
+    private boolean toggleState = true;
     private final Library library = Library.getInstance();
 
     public UserForm(UsersTable usersTable) {
@@ -28,7 +29,8 @@ public class UserForm {
                 if (id < 1) throw new InvalidUserException("L'identifiant ne peut etre negatif");
                 this.library.addUser(
                         nameTextField.getText(),
-                        id
+                        id,
+                        toggleState
                 );
                 usersTable.notifyUserAdded();
                 frame.dispose();
@@ -47,10 +49,12 @@ public class UserForm {
         JButton submitBtn = new JButton("Enregistrer");
         JButton deleteBtn = new JButton("Supprimer");
         deleteBtn.setBackground(Color.RED);
+        this.toggleState = user.isAllowedToBorrowBook();
         initializeFrame(submitBtn, deleteBtn);
 
         this.idTextField.setText("" + user.getId());
         this.nameTextField.setText(user.getName());
+
 
         submitBtn.addActionListener(e -> {
             try {
@@ -63,6 +67,7 @@ public class UserForm {
                     throw new InvalidUserException("Certaines informations sont invalides");
                 user.setId(id);
                 user.setName(this.nameTextField.getText());
+                user.setAllowedToBorrowBook(toggleState);
 
                 usersTable.notifyUserAdded();
                 frame.dispose();
@@ -95,6 +100,7 @@ public class UserForm {
         frame.setSize(500, 250);
         frame.setResizable(false);
         JPanel panel = new JPanel(new GridLayout(0, 2));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // mount form fields
         JLabel nameLabel = new JLabel("Nom utilisateur");
@@ -102,12 +108,22 @@ public class UserForm {
         panel.add(nameLabel);
         panel.add(nameTextField);
 
-        JLabel idLabel = new JLabel("Numero identifiabt");
+        JLabel idLabel = new JLabel("Numero identifiant");
         this.idTextField = new JTextField();
         panel.add(idLabel);
         panel.add(idTextField);
 
-        JPanel footerPanel = new JPanel();
+        JLabel cotisationDoneLabel = new JLabel("A jour sur cotisations?");
+        JButton toggleButton = new JButton(this.toggleState ? "OUI" : "NON");
+        toggleButton.addActionListener(e -> {
+            this.toggleState = !this.toggleState;
+            toggleButton.setText(this.toggleState ? "OUI" : "NON");
+        });
+        panel.add(cotisationDoneLabel);
+        panel.add(toggleButton);
+
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 100, 10));
+        footerPanel.setBorder(new EmptyBorder(0, 150, 0, 100));
         footerPanel.add(subtmitBtn);
 
         if (deleteBtn != null) {
@@ -117,7 +133,7 @@ public class UserForm {
         panel.setLayout(new GridLayout(0, 2));
         footerPanel.setLayout(new BoxLayout(footerPanel, BoxLayout.X_AXIS));
         frame.add(panel, BorderLayout.NORTH);
-        frame.add(footerPanel, BorderLayout.CENTER);
+        frame.add(footerPanel, BorderLayout.EAST);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

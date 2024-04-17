@@ -38,12 +38,6 @@ public class Library {
         return this.booksList;
     }
 
-    public void addBook(Book book) throws BookAlreadyExistsException, InvalidBookException {
-        if (this.doesBookExist(book.getISBN())) throw new BookAlreadyExistsException("Ce livre existe deja");
-        if (this.bookHasInvalidFields(book)) throw new InvalidBookException("Un champ est in correct");
-        this.booksList.add(book);
-    }
-
     /**
      * TODO: rework this (please)
      */
@@ -78,14 +72,7 @@ public class Library {
         return resultats;
     }
 
-    public Book findUnique(String isbn) {
-        for (Book book : this.booksList) {
-            if (book.getISBN().equals(isbn)) return book;
-        }
-        return null;
-    }
-
-    public void borrowBook(User user, Book book) throws UnauthorizedBookBorrowException, AlreadyBorrowedBookExeption {
+    public void registerBookBorrow(User user, Book book) throws UnauthorizedBookBorrowException, AlreadyBorrowedBookExeption {
         if (!this.isBookBorrowableByUser(user)) {
             throw new UnauthorizedBookBorrowException("Cet utilisateur n'est pas éligible");
         }
@@ -101,7 +88,7 @@ public class Library {
         }
     }
 
-    public void returnBook(User user, Book book) throws BookNotFoundException {
+    public void registerBookReturn(User user, Book book) throws BookNotFoundException {
         if (!this.userBorrows.get(user).remove(book)) throw new BookNotFoundException("Ce livre est introuvable");
     }
 
@@ -129,11 +116,19 @@ public class Library {
         return usersList;
     }
 
-    public void addUser(String name, int id) throws UserAlreadyExistException, InvalidUserException {
+    public void addUser(String name, int id, boolean allowedCotisation) throws UserAlreadyExistException, InvalidUserException {
         if (name == null || name.isBlank()) throw new InvalidUserException("Informations invalides");
         if (this.doesUserExist(id)) throw new UserAlreadyExistException("Cet utilisateur existe deja");
 
-        this.usersList.add(new User(name, id));
+        User user = new User(name, id);
+        user.setAllowedToBorrowBook(allowedCotisation);
+        this.usersList.add(user);
+
+        /* frankly, this is (arguably) useless
+        A better solution would have been to use a reference to user.borrowedBooks
+        ...
+        */
+        this.userBorrows.put(user, new ArrayList<Book>());
     }
 
     public boolean doesUserExist(int id) {
