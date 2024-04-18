@@ -10,38 +10,55 @@ import ui.forms.BookForm;
 
 import javax.swing.*;
 
+/**
+ * Custom cell editor for button actions in a JTable column.
+ */
 public class ButtonEditor extends DefaultCellEditor {
     private final JButton button;
     private final BooksTable model;
     private final Library library = Library.getInstance();
 
-    public ButtonEditor(BooksTable BooksTable, JTable table) {
+    /**
+     * Constructor for a button editor used for modifying books.
+     *
+     * @param booksTable The BooksTable model associated with the editor.
+     * @param table      The JTable instance where the editor is used.
+     */
+    public ButtonEditor(BooksTable booksTable, JTable table) {
         super(new JCheckBox());
-        this.model = BooksTable;
+        this.model = booksTable;
         this.button = new JButton("Modifier");
         button.addActionListener(e -> {
-                final int rowIndex = table.convertRowIndexToModel(table.getEditingRow());
-                Book book = model.getBookAt(rowIndex);
-                new BookForm(model, book);
+            final int rowIndex = table.convertRowIndexToModel(table.getEditingRow());
+            Book book = model.getBookAt(rowIndex);
+            new BookForm(model, book);
         });
     }
 
-    public ButtonEditor(BooksTable BooksTable, JTable table, String textBtn, User user) {
+    /**
+     * Constructor for a button editor used for book return actions.
+     *
+     * @param booksTable The BooksTable model associated with the editor.
+     * @param table      The JTable instance where the editor is used.
+     * @param textBtn    The text displayed on the button.
+     * @param user       The user performing the return action.
+     */
+    public ButtonEditor(BooksTable booksTable, JTable table, String textBtn, User user) {
         super(new JCheckBox());
-        this.model = BooksTable;
+        this.model = booksTable;
         this.button = new JButton(textBtn);
-        button.addActionListener(e ->  {
+        button.addActionListener(e -> {
             final int rowIndex = table.convertRowIndexToModel(table.getEditingRow());
             Book book = model.getBookAt(rowIndex);
-            final int choice = JOptionPane.showConfirmDialog(null, "Cette action est irreversible", "Confirmation de retour", JOptionPane.YES_NO_OPTION);
-            try{
-                if (choice == JOptionPane.YES_NO_OPTION) {
+            final int choice = JOptionPane.showConfirmDialog(null, "Cette action est irréversible", "Confirmation de retour", JOptionPane.YES_NO_OPTION);
+            try {
+                if (choice == JOptionPane.YES_OPTION) {
                     user.returnBorrowedBook(book);
                     library.registerBookReturn(user, book);
-                    BooksTable.notifyBookAdded();
+                    booksTable.notifyBookAdded();
                 }
-            }catch(BookNotFoundException bfe) {
-                System.err.println("Something happenend");
+            } catch (BookNotFoundException bfe) {
+                System.err.println("An error occurred");
                 new WarningDialog(null, ExceptionUtils.SAVING_ERROR_TITLE, bfe.getMessage());
             }
         });

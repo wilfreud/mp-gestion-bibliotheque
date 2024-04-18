@@ -196,7 +196,6 @@ public class MainWindow {
 
         // container for action buttons
         JPanel actionPanelContainer = new JPanel(new FlowLayout());
-//        JLabel rowsCountLabel = new JLabel("Nombre de livres: " + libraryRef.booksCount());
 
         JButton addBookBtn = new JButton("Ajouter");
         addBookBtn.addActionListener(e -> new BookForm(tableModel));

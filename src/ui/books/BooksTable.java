@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Table model for displaying books in a JTable.
+ */
 public class BooksTable extends AbstractTableModel {
     private static final Map<String, String> classNameMap = new HashMap<>();
 
@@ -22,7 +25,7 @@ public class BooksTable extends AbstractTableModel {
     }
 
     private ArrayList<Book> data = Library.getInstance().getBooksList();
-    private final String[] columnNames = {"Titre", "Auteur", "Anne Publication", "ISBN", "Genre", "Action"};
+    private final String[] columnNames = {"Titre", "Auteur", "Année de Publication", "ISBN", "Genre", "Action"};
 
     public BooksTable() {
     }
@@ -50,6 +53,12 @@ public class BooksTable extends AbstractTableModel {
         return columnNames[column];
     }
 
+    /**
+     * Retrieves the book at the specified index.
+     *
+     * @param index The index of the book to retrieve.
+     * @return The book at the specified index.
+     */
     public Book getBookAt(int index) {
         return this.data.get(index);
     }

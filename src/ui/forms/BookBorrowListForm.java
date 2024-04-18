@@ -9,35 +9,42 @@ import ui.books.ButtonRenderer;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * A form for managing book borrowings by a user.
+ */
 public class BookBorrowListForm {
+    /**
+     * Constructs a BookBorrowListForm instance.
+     *
+     * @param user The user whose borrowings are managed.
+     */
     public BookBorrowListForm(User user) {
-        // initialize frame
+        // Initialize frame
         JFrame frame = new JFrame("Gestion des emprunts");
         frame.setSize(800, 600);
 
-        // insert window content
+        // Insert window content
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        // page title
+        // Page title
         JLabel panelTitle = new JLabel("Liste des emprunts");
         panelTitle.setFont(Utils.createFont(panelTitle, Utils.FontSize.H2));
         panel.add(panelTitle);
 
-
-        // data table
+        // Data table
         BooksTable tableModel = new BooksTable(user.getBorrowedBooks());
         JTable table = new JTable(tableModel);
 
         table.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer("Rendre"));
         table.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(tableModel, table, "Rendre", user));
 
-        // action button
+        // Action button
         JButton createBtn = new JButton("Nouvel emprunt");
         createBtn.addActionListener(e -> new BookBorrowForm(tableModel, user));
         panel.add(createBtn);
 
-        // open window
+        // Open window
         frame.add(panel, BorderLayout.NORTH);
         frame.add(new JScrollPane(table), BorderLayout.CENTER);
         frame.setLocationRelativeTo(null);

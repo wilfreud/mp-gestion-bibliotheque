@@ -13,11 +13,13 @@ import ui.dialogs.WarningDialog;
 import javax.swing.*;
 import java.awt.*;
 
-
+/**
+ * A form for creating or editing book details.
+ */
 public class BookForm {
     private final JFrame frame = new JFrame("Formulaire Livre");
 
-    // form fields
+    // Form fields
     private final JComboBox<Utils.BookType> categorySelect = new JComboBox<>(Utils.BookType.values());
     private JTextField titleTextField;
     private JTextField authorTextField;
@@ -25,24 +27,27 @@ public class BookForm {
     private JTextField isbnTextField;
     private final Library library = Library.getInstance();
 
-
-    public BookForm(BooksTable BooksTable) {
+    /**
+     * Constructs a BookForm instance for creating a new book.
+     *
+     * @param booksTable The BooksTable associated with this form.
+     */
+    public BookForm(BooksTable booksTable) {
         JButton submitBtn = new JButton("Enregistrer");
         initializeFrame(submitBtn, null);
 
-        // binding action listeners
+        // Binding action listeners
         submitBtn.addActionListener(e -> {
             try {
-
-                this.library.addBook(this.titleTextField.getText(),
+                this.library.addBook(
+                        this.titleTextField.getText(),
                         this.authorTextField.getText(),
                         Integer.parseInt(this.publicationYearTextField.getText()),
                         this.isbnTextField.getText(),
-                        (Utils.BookType) this.categorySelect.getSelectedItem());
-                BooksTable.notifyBookAdded();
+                        (Utils.BookType) this.categorySelect.getSelectedItem()
+                );
+                booksTable.notifyBookAdded();
                 frame.dispose();
-
-
             } catch (BookAlreadyExistsException | InvalidBookException err) {
                 new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, err.getMessage());
             } catch (NumberFormatException nfe) {
@@ -52,30 +57,37 @@ public class BookForm {
                 new WarningDialog(frame, ExceptionUtils.UNEXPECTED_ERROR_TITLE, ExceptionUtils.UNEXPECTED_ERROR_MESSAGE);
             }
         });
-
-
     }
 
-    public BookForm(BooksTable BooksTable, Book book) {
+    /**
+     * Constructs a BookForm instance for editing an existing book.
+     *
+     * @param booksTable The BooksTable associated with this form.
+     * @param book       The book to be edited.
+     */
+    public BookForm(BooksTable booksTable, Book book) {
         JButton submitBtn = new JButton("Enregistrer");
         JButton deleteBtn = new JButton("Supprimer");
         initializeFrame(submitBtn, deleteBtn);
         this.titleTextField.setText(book.getTitle());
         this.authorTextField.setText(book.getAuthor());
-        this.publicationYearTextField.setText("" + book.getPublicationYear());
+        this.publicationYearTextField.setText(String.valueOf(book.getPublicationYear()));
         this.isbnTextField.setText(book.getISBN());
 
         submitBtn.addActionListener(e -> {
             try {
-                if (!this.isbnTextField.getText().equals(book.getISBN()) && this.library.doesBookExist(this.isbnTextField.getText()))
-                    throw new BookAlreadyExistsException("Ce livre existe deja");
-                if (this.library.bookHasInvalidFields(book)) throw new InvalidBookException("Un champ est invalide");
+                if (!this.isbnTextField.getText().equals(book.getISBN()) && this.library.doesBookExist(this.isbnTextField.getText())) {
+                    throw new BookAlreadyExistsException("Ce livre existe déjà");
+                }
+                if (this.library.bookHasInvalidFields(book)) {
+                    throw new InvalidBookException("Un champ est invalide");
+                }
                 book.setTitle(this.titleTextField.getText());
                 book.setAuthor(this.authorTextField.getText());
                 book.setPublicationYear(Integer.parseInt(this.publicationYearTextField.getText()));
                 book.setISBN(this.isbnTextField.getText());
                 this.frame.dispose();
-                BooksTable.notifyBookAdded();
+                booksTable.notifyBookAdded();
             } catch (BookAlreadyExistsException | InvalidBookException err) {
                 new WarningDialog(frame, ExceptionUtils.SAVING_ERROR_TITLE, err.getMessage());
             } catch (NumberFormatException nfe) {
@@ -88,11 +100,11 @@ public class BookForm {
 
         deleteBtn.addActionListener(e -> {
             try {
-                final int choice = JOptionPane.showConfirmDialog(frame, "Etes-vous sûr(e) de vouloir supprimer ce livre?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
-                if (choice == JOptionPane.YES_NO_OPTION) {
+                int choice = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr(e) de vouloir supprimer ce livre ?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
+                if (choice == JOptionPane.YES_OPTION) {
                     this.library.removeBook(book);
                     this.frame.dispose();
-                    BooksTable.notifyBookAdded();
+                    booksTable.notifyBookAdded();
                 }
             } catch (BookNotFoundException er) {
                 new WarningDialog(frame, "Erreur de suppression", er.getMessage());
@@ -103,13 +115,19 @@ public class BookForm {
         });
     }
 
+    /**
+     * Initializes the frame components for the book form.
+     *
+     * @param submitBtn The submit button for the form.
+     * @param deleteBtn The delete button for the form (optional).
+     */
     public void initializeFrame(JButton submitBtn, JButton deleteBtn) {
         frame.setSize(500, 250);
         frame.setResizable(false);
         JPanel panel = new JPanel(new GridLayout(0, 2));
 
-        // setting & mounting fields
-        JLabel categoryLabel = new JLabel("Categorie");
+        // Setting and mounting fields
+        JLabel categoryLabel = new JLabel("Catégorie");
         panel.add(categoryLabel);
         panel.add(categorySelect);
 
@@ -136,13 +154,12 @@ public class BookForm {
         JPanel footerPanel = new JPanel();
         footerPanel.add(submitBtn);
 
-        // add delete btn
+        // Add delete button if provided
         if (deleteBtn != null) {
             footerPanel.add(deleteBtn);
         }
 
-
-        // final component mounting
+        // Final component mounting
         frame.add(panel);
         frame.add(footerPanel);
         frame.setLayout(new FlowLayout());

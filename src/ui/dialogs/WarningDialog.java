@@ -2,43 +2,38 @@ package ui.dialogs;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
+/**
+ * A custom dialog for displaying warning messages.
+ */
 public class WarningDialog {
 
-    private final JButton button;
-
+    /**
+     * Constructs a warning dialog with the specified title and message.
+     *
+     * @param parent  The parent JFrame for the dialog.
+     * @param title   The title of the dialog window.
+     * @param message The warning message to display.
+     */
     public WarningDialog(JFrame parent, String title, String message) {
-
         Dialog dialog = new Dialog(parent, title, true);
         dialog.setSize(300, 150);
         dialog.setLayout(new GridLayout(2, 0));
 
-        // content
+        // Content
         JLabel text = new JLabel(message);
         text.setForeground(Color.RED);
         text.setHorizontalAlignment(SwingConstants.CENTER);
-        this.button = new JButton("Compris");
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        JButton button = new JButton("Compris");
+        button.addActionListener(e -> dialog.dispose());
 
-        // mount components
+        // Mount components
         dialog.add(text, BorderLayout.CENTER);
         dialog.add(button, BorderLayout.CENTER);
 
-        // enable
+        // Configure dialog
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
-    }
-
-    public WarningDialog(JFrame parent, String title, String message, ActionListener action) {
-        this(parent, title, message);
-        this.button.addActionListener(action);
     }
 }
